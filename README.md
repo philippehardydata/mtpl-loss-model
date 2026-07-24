@@ -1,64 +1,58 @@
-[README (2).md](https://github.com/user-attachments/files/26099961/README.2.md)
-# Auto Insurance — Aggregate Loss Distribution
+# MTPL Aggregate Loss Distribution
 
-This project models the aggregate loss distribution of a motor third-party liability (MTPL) insurance portfolio using Monte Carlo simulation.  
-It was built as part of a personal actuarial portfolio.
-
----
-
-## Project Overview
-
-The model follows the classical frequency-severity approach:
-
-- **Frequency** : number of claims per policyholder ~ Negative Binomial
-- **Severity** : claim payment amount ~ Lognormal (body) + Generalized Pareto Distribution (tail, threshold = €4,000)
-- **Aggregate loss** : Monte Carlo simulation combining both components over the full portfolio
+Monte Carlo simulation of the **aggregate loss distribution** for a French motor third-party liability (MTPL) portfolio.  
+Part of a non-life quantitative risk portfolio — see [featured projects](https://github.com/philippehardydata/philippehardydata).
 
 ---
 
-## Repository Structure
+## Project overview
+
+Classical **frequency–severity** approach:
+
+- **Frequency** — claims per policyholder ~ Negative Binomial (overdispersion)
+- **Severity** — Lognormal (body) + Generalized Pareto (tail, threshold €4,000)
+- **Aggregate loss** — Monte Carlo over the full portfolio → VaR & TVaR at 99.5%
+
+---
+
+## Repository structure
 
 ```
-auto-loss-distribution/
-│
+mtpl-loss-model/
 ├── README.md
-├── frequency_analysis.ipynb       # Exploratory analysis and frequency model calibration
-├── severity_analysis.ipynb        # Exploratory analysis and severity model calibration
-└── aggregate_loss.ipynb           # Final aggregate loss simulation and results
+├── frequency_analysis.ipynb    # Frequency calibration
+├── severity_analysis.ipynb     # Severity / EVT threshold
+├── aggregate_loss.ipynb        # Monte Carlo + risk measures
+├── freMTPL2freq.csv
+└── freMTPL2sev.csv
 ```
 
-Run the notebooks in order: frequency → severity → aggregate loss.
+Run in order: **frequency → severity → aggregate loss**.
 
 ---
 
 ## Data
 
-The dataset used is **freMTPL2** (French Motor Third-Party Liability), a publicly available benchmark dataset from the `CASdatasets` R package.
+**freMTPL2** — French MTPL benchmark (600k+ policies, 36k+ claims):
 
-- `freMTPL2freq.csv` — policy and claim frequency data
-- `freMTPL2sev.csv` — claim severity (payment amounts)
+| File | Content |
+|------|---------|
+| `freMTPL2freq.csv` | Policy-level frequency data |
+| `freMTPL2sev.csv` | Claim payment amounts |
 
 > Source: Charpentier, A. (ed.). *Computational Actuarial Science with R*. CRC Press, 2014.  
-> Available via the `CASdatasets` R package: http://cas.uqam.ca/
+> Also available via the [CASdatasets](http://cas.uqam.ca/) R package.
 
 ---
 
 ## Methods
 
 | Component | Distribution | Rationale |
-|---|---|---|
-| Claim frequency | Negative Binomial | Overdispersion: variance > mean |
-| Claim severity (body) | Truncated Lognormal | Reasonable fit below €4,000 threshold |
-| Claim severity (tail) | Generalized Pareto | Heavy tail above €4,000 (Mean Excess Plot) |
-| Aggregate loss | Monte Carlo | N simulations of full portfolio |
-
----
-
-## Model Limitations
-
-- **Uniform λ and payment probability** : both are modelled at portfolio level. A future GLM per policyholder (using characteristics such as age, vehicle type, region) would improve individual pricing accuracy.
-- **Multiple payments per claim** : since each payment is treated as an independent claim, the payment probability is overstated and the severity per claim is understated. These two effects partially offset each other in the aggregate, but the severity distribution may be underestimated in the tail.
-- **Lognormal body fit** : the Lognormal does not fully capture the body profile — the empirical quantile curve suggests two distinct regimes, possibly driven by structural effects in the data (fixed tariffs, coverage caps, or a mix of claim types such as material vs bodily injury). Alternative distributions such as Burr or Weibull could be investigated.
+|-----------|-------------|-----------|
+| Claim frequency | Negative Binomial | Variance > mean (overdispersion) |
+| Severity (body) | Truncated Lognormal | Fit below €4,000 threshold |
+| Severity (tail) | Generalized Pareto | Heavy tail above threshold (Mean Excess Plot) |
+| Aggregate loss | Monte Carlo | Full portfolio simulation |
 
 ---
 
@@ -74,6 +68,28 @@ scikit-learn
 
 ---
 
+## Model limitations
+
+- **Portfolio-level λ and payment probability** — no per-policy GLM yet
+- **Multiple payments per claim** — freMTPL2 structure; severity may be understated in the tail
+- **Lognormal body** — two-regime profile; Burr/Weibull alternatives worth exploring
+- **Simulation count** — increase `N_SIMULATIONS` for production VaR 99.5% (use 10k+)
+
+---
+
+## Related projects
+
+| Project | Focus | Repo |
+|---------|-------|------|
+| **Claim frequency** | GLM vs ML for P(claim) | [EDA-GLM-RF-XGB](https://github.com/philippehardydata/EDA-GLM-RF-XGB) |
+| **Aggregate loss (this repo)** | Frequency–severity Monte Carlo, VaR/TVaR | [mtpl-loss-model](https://github.com/philippehardydata/mtpl-loss-model) |
+| **Reserve risk (Solvency II)** | Tweedie GLM + double bootstrap CDR | [CDRboot](https://github.com/philippehardydata/CDRboot) |
+
+Full portfolio overview: [philippehardydata](https://github.com/philippehardydata/philippehardydata)
+
+---
+
 ## Author
 
-Built with Python (Jupyter). Actuarial portfolio project.
+**Philippe le Hardÿ** — Actuarial & Quantitative Risk Consultant  
+[GitHub](https://github.com/philippehardydata)
