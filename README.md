@@ -73,7 +73,7 @@ scikit-learn
 - **Portfolio-level λ and payment probability** — no per-policy GLM yet
 - **Multiple payments per claim** — freMTPL2 structure; severity may be understated in the tail
 - **Lognormal body** — two-regime profile; Burr/Weibull alternatives worth exploring
-- **Simulation count** — increase `N_SIMULATIONS` for production VaR 99.5% (use 10k+)
+- **Simulation count** — default `N_SIMULATIONS = 10_000` in `aggregate_loss.ipynb` (~50 tail obs. at 99.5%); increase to `100_000` for regulatory-style runs
 
 ---
 
